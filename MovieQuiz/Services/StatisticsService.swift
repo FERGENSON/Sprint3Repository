@@ -55,7 +55,9 @@ extension StatisticsService: StatisticsServiceProtocol {
     
     func store(correct count: Int, total amount: Int) {
         correctAnswers += count
+        var gamesCount = self.gamesCount
         gamesCount += 1
+        self.gamesCount = gamesCount
         let game = GameResult(correct: count, total: amount, date: Date())
         if game.isBetterThan(bestGame) {
             bestGame.correct = count

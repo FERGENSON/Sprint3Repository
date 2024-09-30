@@ -1,9 +1,3 @@
-//
-//  GameResult.swift
-//  MovieQuiz
-//
-//  Created by macbook on 28.09.2024.
-//
 
 import UIKit
 

@@ -3,6 +3,27 @@ import UIKit
 
 final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate
 {
+    // MARK: - IB Outlets
+    
+    @IBOutlet weak private var imageView: UIImageView!
+    @IBOutlet weak private var textLabel: UILabel!
+    @IBOutlet weak private var counterLabel: UILabel!
+    
+    // MARK: - Private properties
+    
+    private var currentQuestion: QuizQuestion?
+    
+    private var currentQuestionIndex = 0
+    
+    private var correctAnswers = 0
+    
+    private let questionsAmount: Int = 10
+    
+    private var questionFactory: QuestionFactoryProtocol?
+    
+    private var alertPresenter: AlertPresenterProtocol?
+    
+    private let statisticsService = StatisticsService()
     
     // MARK: - Lifecycle
     
@@ -17,25 +38,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate
         self.alertPresenter?.delegate = self
     }
     
-    // MARK: - QuestionFactoryDelegate
-    
-    func didReceiveNextQuestion(question: QuizQuestion?) {
-        guard let question = question else {
-            return
-        }
-        currentQuestion = question
-        let viewModel = convert(model: question)
-        
-        DispatchQueue.main.async { [weak self] in
-            self?.show(quiz: viewModel)
-        }
-    }
-    
-    // MARK: - Action
-    
-    @IBOutlet private var imageView: UIImageView!
-    @IBOutlet private var textLabel: UILabel!
-    @IBOutlet private var counterLabel: UILabel!
+    // MARK: - IB Actions
     
     @IBAction private func yesButtonClicked(_ sender: Any) {
         guard let currentQuestion = currentQuestion else {
@@ -93,8 +96,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate
             
             let text = "Ваш результат: \(correctAnswers)/\(questionsAmount) \n Количество сыграных квизов: \(statisticsService.gamesCount) \n Рекорд: \(statisticsService.bestGame.correct)/\(statisticsService.bestGame.total) (\(statisticsService.bestGame.date.dateTimeString)) \n Средняя точность: \(String(format: "%.2f", statisticsService.totalAccuracy)) %"
             
-            statisticsService.store(correct: correctAnswers, total: questionsAmount)
-            
             let viewModel = AlertModel(
                 title: "Этот раунд окончен!",
                 message: text,
@@ -114,21 +115,17 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate
         }
     }
     
+    // MARK: - QuestionFactoryDelegate (Public function)
     
-    // MARK: - Private properties
-    
-    private var currentQuestion: QuizQuestion?
-    
-    private var currentQuestionIndex = 0
-    
-    private var correctAnswers = 0
-    
-    private let questionsAmount: Int = 10
-    
-    private var questionFactory: QuestionFactoryProtocol?
-    
-    private var alertPresenter: AlertPresenterProtocol?
-    
-    private let statisticsService = StatisticsService()
-    
+    func didReceiveNextQuestion(question: QuizQuestion?) {
+        guard let question = question else {
+            return
+        }
+        currentQuestion = question
+        let viewModel = convert(model: question)
+        
+        DispatchQueue.main.async { [weak self] in
+            self?.show(quiz: viewModel)
+        }
+    }
 }

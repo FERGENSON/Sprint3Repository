@@ -1,7 +1,7 @@
 
 import UIKit
 
-class QuestionFactory:QuestionFactoryProtocol {
+final class QuestionFactory:QuestionFactoryProtocol {
     
     func requestNextQuestion() {
         guard let index = (0..<questions.count).randomElement() else {
