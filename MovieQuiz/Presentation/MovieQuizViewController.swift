@@ -42,12 +42,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate
         self.alertPresenter = AlertPresenter()
         self.alertPresenter?.delegate = self
         
-        //        let questionFactory = QuestionFactory()
-        //        questionFactory.delegate = self
-        //        self.questionFactory = questionFactory
-        //        questionFactory.requestNextQuestion()
-        //        self.alertPresenter = AlertPresenter()
-        //        self.alertPresenter?.delegate = self
     }
     
     // MARK: - IB Actions
