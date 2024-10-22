@@ -44,6 +44,7 @@ final class QuestionFactory:QuestionFactoryProtocol {
                     self.delegate?.didLoadDataFromServer()
                 case .failure(let error):
                     self.delegate?.didFailToLoadData(with: error)
+//                    self.requestNextQuestion()
                 }
             }
         }
