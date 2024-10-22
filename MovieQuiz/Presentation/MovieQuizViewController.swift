@@ -6,6 +6,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate
     // MARK: - IB Outlets
     
     @IBOutlet weak private var imageView: UIImageView!
+    
     @IBOutlet weak private var textLabel: UILabel!
     @IBOutlet weak private var counterLabel: UILabel!
     
@@ -29,6 +30,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        presenter.viewController = self
         
         imageView.layer.cornerRadius = 20
         questionFactory = QuestionFactory(moviesLoader: MoviesLoader(networkClient: NetworkClient()), delegate: self)
@@ -44,20 +46,14 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate
     
     // MARK: - IB Actions
     
-    @IBAction private func yesButtonClicked(_ sender: Any) {
-        guard let currentQuestion = currentQuestion else {
-            return
-        }
-        let givenAnswer = true
-        showAnswerResult(isCorrect: currentQuestion.correctAnswer == givenAnswer)
+    @IBAction private func yesButtonClicked(_ sender: UIButton) {
+        presenter.currentQuestion = currentQuestion
+        presenter.yesButtonClicked()
     }
     
-    @IBAction private func noButtonClicked(_ sender: Any) {
-        guard let currentQuestion = currentQuestion else {
-            return
-        }
-        let givenAnswer = false
-        showAnswerResult(isCorrect: currentQuestion.correctAnswer == givenAnswer)
+    @IBAction private func noButtonClicked(_ sender: UIButton) {
+        presenter.currentQuestion = currentQuestion
+        presenter.noButtonClicked()
     }
     
     // MARK: - Private functions
@@ -69,7 +65,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate
         counterLabel.text = step.questionNumber
     }
     
-    private func showAnswerResult(isCorrect: Bool) {
+    internal func showAnswerResult(isCorrect: Bool) {
         if isCorrect {
             correctAnswers += 1
         }
