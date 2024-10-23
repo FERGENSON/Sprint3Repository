@@ -5,6 +5,10 @@ class AlertPresenter: AlertPresenterProtocol {
     
     weak var delegate: UIViewController?
     
+    init(delegate: UIViewController?) {
+        self.delegate = delegate
+    }
+    
     func presentAlert(result: AlertModel) {
         let alert = UIAlertController(
             title: result.title,
