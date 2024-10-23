@@ -1,10 +1,10 @@
 
 import UIKit
 
-final class MovieQuizViewController: UIViewController {
+final class MovieQuizViewController: UIViewController, MovieQuizViewControllerProtocol {
     // MARK: - IB Outlets
     
-    @IBOutlet weak internal var imageView: UIImageView!
+    @IBOutlet weak var imageView: UIImageView!
     
     @IBOutlet weak private var textLabel: UILabel!
     @IBOutlet weak private var counterLabel: UILabel!
@@ -21,12 +21,8 @@ final class MovieQuizViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-//        presenter.viewController = self
         
         presenter = MovieQuizPresenter(viewController: self)
-        
-        self.alertPresenter = AlertPresenter(delegate: self)
-        self.alertPresenter?.delegate = self
         
         imageView.layer.cornerRadius = 20
         
@@ -85,6 +81,11 @@ final class MovieQuizViewController: UIViewController {
             imageView.layer.borderWidth = 8
             imageView.layer.borderColor = isCorrectAnswer ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
         }
+    
+    func deleteImageBorder() {
+        imageView.layer.borderWidth = 0
+    }
+    
     
     func showNetworkError (message:String) {
         hideLoadingIndicator ()
