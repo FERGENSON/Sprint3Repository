@@ -12,7 +12,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     
     var currentQuestion: QuizQuestion?
     
-    private weak var viewController: MovieQuizViewControllerProtocol?
+    weak var viewController: MovieQuizViewControllerProtocol?
     
     var correctAnswers: Int = 0
     
@@ -84,41 +84,47 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
         }
     }
     
-    //    func didReceiveNextQuestion(question: QuizQuestion?) {
-    //        guard let question = question else {
-    //            return
-    //        }
-    //
-    //        currentQuestion = question
-    //        let viewModel = convert(model: question)
-    //        DispatchQueue.main.async { [weak self] in
-    //            self?.viewController?.show(quiz: viewModel)
-    //        }
-    //    }
-    
-    func proceedToNextQuestionOrResults() {
-        if isLastQuestion() {
-            
-            let text = makeResultsMessage()
-            
-            let viewModel = AlertModel(
-                title: "Этот раунд окончен!",
-                message: text,
-                buttonText: "Сыграть ещё раз", completion: {[weak self] in
-                    
-                    guard let self = self else { return }
-                    
-                    restartGame()
-                    self.correctAnswers = 0
-                    
-                    questionFactory?.requestNextQuestion()
-                })
-            alertPresenter?.presentAlert(result: viewModel)
-        } else {
-            switchToNextQuestion()
-            self.questionFactory?.requestNextQuestion()
+    private func proceedToNextQuestionOrResults() {
+            if self.isLastQuestion() {
+                
+                let text = correctAnswers == self.questionsAmount ?
+                "Поздравляем, вы ответили на 10 из 10!" :
+                "Вы ответили на \(correctAnswers) из 10, попробуйте ещё раз!"
+
+                let viewModel = QuizResultsViewModel(
+                    title: "Этот раунд окончен!",
+                    text: text,
+                    buttonText: "Сыграть ещё раз")
+                    viewController?.show(quiz: viewModel)
+            } else {
+                self.switchToNextQuestion()
+                questionFactory?.requestNextQuestion()
+            }
         }
-    }
+    
+//    func proceedToNextQuestionOrResults() {
+//        if self.isLastQuestion() {
+//            
+//            let text = makeResultsMessage()
+//            
+//            let viewModel = AlertModel(
+//                title: "Этот раунд окончен!",
+//                message: text,
+//                buttonText: "Сыграть ещё раз", completion: {[weak self] in
+//                    
+//                    guard let self = self else { return }
+//                    
+//                    restartGame()
+//                    self.correctAnswers = 0
+//                    
+//                    questionFactory?.requestNextQuestion()
+//                })
+//            alertPresenter?.presentAlert(result: viewModel)
+//        } else {
+//            switchToNextQuestion()
+//            self.questionFactory?.requestNextQuestion()
+//        }
+//    }
     
     func makeResultsMessage() -> String {
         statisticsService.store(correct: correctAnswers, total: questionsAmount)
@@ -145,7 +151,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
             guard let self = self else { return }
-            self.proceedToNextQuestionOrResults()
+            proceedToNextQuestionOrResults()
         }
     }
     
