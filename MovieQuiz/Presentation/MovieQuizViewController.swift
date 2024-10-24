@@ -50,11 +50,10 @@ final class MovieQuizViewController: UIViewController, MovieQuizViewControllerPr
     }
     
     func show(quiz result: QuizResultsViewModel) {
-            let message = presenter.makeResultsMessage()
             
             let alert = UIAlertController(
                 title: result.title,
-                message: message,
+                message: result.text,
                 preferredStyle: .alert)
                 
             let action = UIAlertAction(title: result.buttonText, style: .default) { [weak self] _ in
@@ -87,19 +86,7 @@ final class MovieQuizViewController: UIViewController, MovieQuizViewControllerPr
         imageView.layer.borderWidth = 0
     }
     
-    
-    func showNetworkError (message:String) {
-        hideLoadingIndicator ()
-        
-        let text = "Произошла ошибка"
-        let viewModel = AlertModel(title: text,
-                                   message: message,
-                                   buttonText: "Попробовать еще раз") { [weak self] in
-            guard let self = self else { return }
-            
-            self.presenter.restartGame()
-            
-        }
+    func showNetworkError (viewModel:AlertModel) {
         alertPresenter?.presentAlert(result: viewModel)
     }
 }

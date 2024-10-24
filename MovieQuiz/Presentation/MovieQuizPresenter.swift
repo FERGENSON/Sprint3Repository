@@ -3,12 +3,9 @@ import UIKit
 
 final class MovieQuizPresenter: QuestionFactoryDelegate {
     
-    
-    // MARK: - Properties
+    // MARK: - Public properties
     
     let questionsAmount: Int = 10
-    
-    private var currentQuestionIndex: Int = 0
     
     var currentQuestion: QuizQuestion?
     
@@ -20,7 +17,13 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     
     var alertPresenter: AlertPresenterProtocol?
     
+    // MARK: - Private properties
+    
     private let statisticsService: StatisticsServiceProtocol!
+    
+    private var currentQuestionIndex: Int = 0
+    
+    // MARK: - Public functions
     
     init(viewController: MovieQuizViewControllerProtocol) {
         self.viewController = viewController
@@ -32,44 +35,12 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
         viewController.showLoadingIndicator()
     }
     
-    // MARK: - QuestionFactoryDelegate
-    
-    func didLoadDataFromServer() {
-        viewController?.hideLoadingIndicator()
-        questionFactory?.requestNextQuestion()
-    }
-    
-    func didFailToLoadData(with error: Error) {
-        let message = error.localizedDescription
-        viewController?.showNetworkError(message: message)
-    }
-    
-    
-    // MARK: - Functions
-    
     func yesButtonClicked() {
         didAnswer(isYes: true)
     }
     
     func noButtonClicked() {
         didAnswer(isYes: false)
-    }
-    
-    func didAnswer(isCorrect: Bool) {
-        if isCorrect {
-            correctAnswers += 1
-        }
-    }
-    
-    func didAnswer(isYes: Bool) {
-        
-        guard let currentQuestion = currentQuestion else {
-            return
-        }
-        
-        let givenAnswer = isYes
-        
-        proceedWithAnswer(isCorrect: givenAnswer == currentQuestion.correctAnswer)
     }
     
     func didReceiveNextQuestion(question: QuizQuestion?) {
@@ -82,66 +53,6 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
             self?.viewController?.show(quiz: viewModel)
             self?.viewController?.deleteImageBorder()
         }
-    }
-    
-    private func proceedToNextQuestionOrResults() {
-            if self.isLastQuestion() {
-                
-                let text = correctAnswers == self.questionsAmount ?
-                "Поздравляем, вы ответили на 10 из 10!" :
-                "Вы ответили на \(correctAnswers) из 10, попробуйте ещё раз!"
-
-                let viewModel = QuizResultsViewModel(
-                    title: "Этот раунд окончен!",
-                    text: text,
-                    buttonText: "Сыграть ещё раз")
-                    viewController?.show(quiz: viewModel)
-            } else {
-                self.switchToNextQuestion()
-                questionFactory?.requestNextQuestion()
-            }
-        }
-    
-//    func proceedToNextQuestionOrResults() {
-//        if self.isLastQuestion() {
-//            
-//            let text = makeResultsMessage()
-//            
-//            let viewModel = AlertModel(
-//                title: "Этот раунд окончен!",
-//                message: text,
-//                buttonText: "Сыграть ещё раз", completion: {[weak self] in
-//                    
-//                    guard let self = self else { return }
-//                    
-//                    restartGame()
-//                    self.correctAnswers = 0
-//                    
-//                    questionFactory?.requestNextQuestion()
-//                })
-//            alertPresenter?.presentAlert(result: viewModel)
-//        } else {
-//            switchToNextQuestion()
-//            self.questionFactory?.requestNextQuestion()
-//        }
-//    }
-    
-    func makeResultsMessage() -> String {
-        statisticsService.store(correct: correctAnswers, total: questionsAmount)
-        
-        let bestGame = statisticsService.bestGame
-        
-        let totalPlaysCountLine = "Количество сыгранных квизов: \(statisticsService.gamesCount)"
-        let currentGameResultLine = "Ваш результат: \(correctAnswers)\\\(questionsAmount)"
-        let bestGameInfoLine = "Рекорд: \(bestGame.correct)\\\(bestGame.total)"
-        + " (\(bestGame.date.dateTimeString))"
-        let averageAccuracyLine = "Средняя точность: \(String(format: "%.2f", statisticsService.totalAccuracy))%"
-        
-        let resultMessage = [
-            currentGameResultLine, totalPlaysCountLine, bestGameInfoLine, averageAccuracyLine
-        ].joined(separator: "\n")
-        
-        return resultMessage
     }
     
     func proceedWithAnswer(isCorrect: Bool) {
@@ -175,6 +86,87 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
             question: model.text,
             questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
     }
+    
+    // MARK: - Private functions
+    
+    private func makeResultsMessage() -> String {
+        statisticsService.store(correct: correctAnswers, total: questionsAmount)
+        
+        let bestGame = statisticsService.bestGame
+        
+        let totalPlaysCountLine = "Количество сыгранных квизов: \(statisticsService.gamesCount)"
+        let currentGameResultLine = "Ваш результат: \(correctAnswers)\\\(questionsAmount)"
+        let bestGameInfoLine = "Рекорд: \(bestGame.correct)\\\(bestGame.total)"
+        + " (\(bestGame.date.dateTimeString))"
+        let averageAccuracyLine = "Средняя точность: \(String(format: "%.2f", statisticsService.totalAccuracy))%"
+        
+        let resultMessage = [
+            currentGameResultLine, totalPlaysCountLine, bestGameInfoLine, averageAccuracyLine
+        ].joined(separator: "\n")
+        
+        return resultMessage
+    }
+    
+    private func proceedToNextQuestionOrResults() {
+        if self.isLastQuestion() {
+            
+//            let text = correctAnswers == self.questionsAmount ?
+//            "Поздравляем, вы ответили на 10 из 10!" :
+//            "Вы ответили на \(correctAnswers) из 10, попробуйте ещё раз!"
+            
+            let text = makeResultsMessage()
+            
+            let viewModel = QuizResultsViewModel(
+                title: "Этот раунд окончен!",
+                text: text,
+                buttonText: "Сыграть ещё раз")
+            viewController?.show(quiz: viewModel)
+        } else {
+            self.switchToNextQuestion()
+            questionFactory?.requestNextQuestion()
+        }
+    }
+    
+    private func didAnswer(isCorrect: Bool) {
+        if isCorrect {
+            correctAnswers += 1
+        }
+    }
+    
+    private func didAnswer(isYes: Bool) {
+        
+        guard let currentQuestion = currentQuestion else {
+            return
+        }
+        
+        let givenAnswer = isYes
+        
+        proceedWithAnswer(isCorrect: givenAnswer == currentQuestion.correctAnswer)
+    }
+    
+    // MARK: - QuestionFactoryDelegate
+    
+    func didLoadDataFromServer() {
+        viewController?.hideLoadingIndicator()
+        questionFactory?.requestNextQuestion()
+    }
+    
+    func didFailToLoadData(with error: Error) {
+        viewController?.hideLoadingIndicator ()
+        
+        let message = error.localizedDescription
+        let text = "Произошла ошибка"
+        let viewModel = AlertModel(title: text,
+                                   message: message,
+                                   buttonText: "Попробовать еще раз") { [weak self] in
+            guard let self = self else { return }
+            
+            questionFactory?.loadData()
+            self.restartGame()
+        }
+        viewController?.showNetworkError(viewModel: viewModel)
+    }
+    
 }
 
 
